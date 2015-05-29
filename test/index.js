@@ -226,6 +226,7 @@ experiment('Dogwater', function () {
             expect(error).not.to.exist;
             expect(dogwater.bar).to.be.an.object();
             expect(dogwater.zoo).to.be.an.object();
+            expect(dogwater.doe).to.be.an.object();
             
             callback();
         }
@@ -274,6 +275,7 @@ experiment('Dogwater', function () {
                     
                     expect(dogwater.bar).to.be.an.object();
                     expect(dogwater.zoo).to.be.an.object();
+                    expect(dogwater.doe).to.be.an.object();
                     
                     reply({});
                 }
@@ -396,6 +398,56 @@ experiment('Dogwater', function () {
         
     });
 
+    test('provides correct bound `this` for model instances.', function (done) {
+        
+        var options = {
+            connections: connections,
+            adapters: fixtureAdapters,
+            models: require(modelsFile),
+            data: {
+                fixtures: require(fixturesFile)
+            }
+        };
+        
+        var plugin8 = {
+           register: require('..'),
+           options: options
+        };
+        
+        var plugin7 = {
+           plugin: require('..'),
+           options: options
+        };
+        
+        var theTest = function (server, error, callback) {
+            
+            expect(error).to.not.exist;
+            
+            var dogwater = server.plugins.dogwater;
+            
+            dogwater.doe.findOne(1)
+            .then(function(aDoe) {
+                
+                expect(aDoe.donMoe()).to.equal("donmoe");
+                callback();
+            })
+            .catch(callback)
+            
+        }
+        
+        Async.series([
+            function(cb) {
+                server8.register(plugin8, function(err) { theTest(server8, err, cb) } );
+            },
+            Memory.teardown,
+            function(cb) {
+                server7.pack.register(plugin7, function(err) { theTest(server7, err, cb) } );
+            },
+            Memory.teardown
+        ,], done);
+        
+    });
+    
     test('errors on fail.', function (done) {
         
         var options = {

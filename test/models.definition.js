@@ -17,5 +17,16 @@ module.exports = [
                 ding: 'float'
             }
         }
+    },
+    
+    {
+        identity: 'doe',
+        connection: 'my_foo',
+        
+        attributes: {
+            don: 'string',
+            moe: 'string',
+            donMoe: function() { return this.don + this.moe }
+        }
     }
 ];
